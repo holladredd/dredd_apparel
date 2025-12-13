@@ -1,8 +1,15 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  /* config options here */
-  reactCompiler: true,
   reactStrictMode: true,
+  devIndicators: false,
+  async rewrites() {
+    return [
+      {
+        source: "/api/:path*",
+        destination: "/src/api/:path*",
+      },
+    ];
+  },
 };
 
 export default nextConfig;

@@ -1,31 +1,32 @@
+import Navbar from "../components/Navbar";
 import Link from "next/link";
 
 export default function Home() {
   return (
-    <div className="min-h-screen flex items-center justify-center p-6">
-      <div className="max-w-3xl w-full bg-white p-8 rounded-xl shadow">
-        <h1 className="text-3xl font-bold mb-4">
-          Clothes Designer (Pages Router)
-        </h1>
-        <p className="mb-6">
-          Choose a template or start designing from scratch.
-        </p>
-        <div className="flex gap-4">
-          <Link href="/templates">
-            <a className="px-4 py-2 bg-sky-600 text-white rounded">
-              Browse Templates
-            </a>
-          </Link>
-          <Link href="/designer">
-            <a className="px-4 py-2 border border-sky-600 text-sky-600 rounded">
-              Open Designer
-            </a>
-          </Link>
-          <Link href="/login">
-            <a className="px-4 py-2 border rounded">Login</a>
-          </Link>
+    <>
+      <Navbar />
+      <section className="min-h-screen flex items-center justify-center bg-gradient-to-r from-black to-gray-800 text-white">
+        <div className="text-center max-w-xl">
+          <h1 className="text-4xl font-bold mb-4">
+            Design. Customize. Sewn for You.
+          </h1>
+          <p className="mb-6">
+            Create custom outfits or buy ready‑made styles tailored to your
+            taste.
+          </p>
+          <div className="flex justify-center gap-4">
+            <Link
+              href="/designer"
+              className="bg-white text-black px-6 py-3 rounded"
+            >
+              Start Designing
+            </Link>
+            <Link href="/shop" className="border px-6 py-3 rounded">
+              Shop Now
+            </Link>
+          </div>
         </div>
-      </div>
-    </div>
+      </section>
+    </>
   );
 }

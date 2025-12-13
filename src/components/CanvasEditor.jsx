@@ -1,96 +1,86 @@
-"use client";
-import { useEffect, useRef, useState } from "react";
-import { fabric } from "fabric";
-import EditorToolbar from "./EditorToolbar";
-import LayersPanel from "./LayersPanel";
-import { saveAs } from 'file-saver';
+import { useEffect, useRef, memo } from "react";
 
+function CanvasEditor({ onReady }) {
+  const canvasRef = useRef(null);
 
-export default function CanvasEditor({ template }) {
-const canvasRef = useRef(null);
-const [canvas, setCanvas] = useState(null);
-const [objects, setObjects] = useState([]);
+  useEffect(() => {
+    let canvasInstance;
+    let fabric;
 
+    async function initFabric() {
+      const fabricModule = await import("fabric");
+      fabric = fabricModule.fabric || fabricModule;
 
-useEffect(() => {
-const c = new fabric.Canvas('designer-canvas', { height: 700, width: 600, backgroundColor: '#fff' });
+      canvasInstance = new fabric.Canvas(canvasRef.current, {
+        width: 400,
+        height: 500,
+        backgroundColor: "#f0f0f0",
+      });
 
+      // Zoom functionality
+      canvasInstance.on("mouse:wheel", function (opt) {
+        const delta = opt.e.deltaY;
+        let zoom = canvasInstance.getZoom();
+        zoom *= 0.999 ** delta;
+        if (zoom > 20) zoom = 20;
+        if (zoom < 0.01) zoom = 0.01;
+        canvasInstance.zoomToPoint(
+          { x: opt.e.offsetX, y: opt.e.offsetY },
+          zoom
+        );
+        opt.e.preventDefault();
+        opt.e.stopPropagation();
+      });
 
-// Add grid or background
-c.on('object:added', updateObjects);
-c.on('object:removed', updateObjects);
-c.on('object:modified', updateObjects);
+      // Pan functionality
+      canvasInstance.on("mouse:down", function (opt) {
+        const evt = opt.e;
+        if (evt.altKey === true) {
+          this.isDragging = true;
+          this.selection = false;
+          this.lastPosX = evt.clientX;
+          this.lastPosY = evt.clientY;
+        }
+      });
 
+      canvasInstance.on("mouse:move", function (opt) {
+        if (this.isDragging) {
+          const e = opt.e;
+          const vpt = this.viewportTransform;
+          vpt[4] += e.clientX - this.lastPosX;
+          vpt[5] += e.clientY - this.lastPosY;
+          this.requestRenderAll();
+          this.lastPosX = e.clientX;
+          this.lastPosY = e.clientY;
+        }
+      });
 
-// Load template if provided
-const url = template || '/templates/shirt.svg';
-fabric.loadSVGFromURL(url, (objectsFromSvg, options) => {
-if (!objectsFromSvg.length) return;
-const obj = fabric.util.groupSVGElements(objectsFromSvg, options);
-obj.selectable = false; // template base locked by default
-obj.id = 'base-template';
-obj.scaleToWidth(400);
-obj.set({ left: 100, top: 50 });
-c.clear();
-c.add(obj);
-c.renderAll();
-updateObjects();
-}, (err) => {
-console.warn('failed to load svg', err);
-});
+      canvasInstance.on("mouse:up", function (opt) {
+        this.setViewportTransform(this.viewportTransform);
+        this.isDragging = false;
+        this.selection = true;
+      });
 
+      if (onReady) {
+        onReady(canvasInstance, fabric);
+      }
+    }
 
-canvasRef.current = c;
-setCanvas(c);
+    initFabric();
 
+    return () => {
+      canvasInstance?.dispose();
+    };
+  }, [onReady]);
 
-return () => {
-c.dispose();
-};
-
-
-function updateObjects() {
-setObjects(c.getObjects().map(o => ({ id: o.id || o.name || o.type, type: o.type })));
+  return (
+    <div className="border rounded-lg p-4 bg-white shadow-inner">
+      <canvas ref={canvasRef} />
+      <p className="text-xs text-gray-500 mt-2 text-center">
+        Hint: Use mouse wheel to zoom, hold 'Alt' and drag to pan.
+      </p>
+    </div>
+  );
 }
-}, [template]);
 
-
-// Export PNG
-const exportPNG = () => {
-if (!canvas) return;
-const dataURL = canvas.toDataURL({ format: 'png', multiplier: 2 });
-const link = document.createElement('a');
-link.href = dataURL;
-link.download = 'design.png';
-link.click();
-};
-
-
-// Save to server
-const saveDesign = async () => {
-if (!canvas) return;
-const json = canvas.toJSON(['id']);
-const resp = await fetch('/api/saveDesign', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ design: json }) });
-const data = await resp.json();
-alert('Saved: ' + data.id);
-};
-
-
-return (
-<div className="bg-white p-4 rounded shadow">
-<div className="flex items-center justify-between mb-3">
-<h2 className="text-lg font-semibold">Designer</h2>
-<div className="flex gap-2">
-<button onClick={exportPNG} className="px-3 py-1 border rounded">Download PNG</button>
-<button onClick={saveDesign} className="px-3 py-1 bg-sky-600 text-white rounded">Save</button>
-</div>
-</div>
-
-
-<div className="flex gap-4">
-<div>
-<EditorToolbar canvas={canvas} />
-</div>
-<div>
-<canvas id="designer-canvas" />
-}
+export default memo(CanvasEditor);

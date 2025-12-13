@@ -1,41 +1,62 @@
-import dynamic from "next/dynamic";
-import { useRouter } from "next/router";
-import { useEffect, useRef, useState } from "react";
-
-// load Fabric on client only
-const CanvasEditor = dynamic(() => import("../components/CanvasEditor"), {
-  ssr: false,
-});
+import { useState, useCallback } from "react";
+import Navbar from "../components/Navbar";
+import EditorToolbar from "../components/EditorToolbar";
+import CanvasEditor from "../components/CanvasEditor";
+import LayersPanel from "../components/LayersPanel";
+import ObjectPanel from "../components/ObjectPanel";
+import TemplatePanel from "../components/TemplatePanel";
 
 export default function Designer() {
-  const router = useRouter();
-  const { template } = router.query;
+  const [canvas, setCanvas] = useState(null);
+  const [fabric, setFabric] = useState(null);
+
+  const handleCanvasReady = useCallback((canvasInstance, fabricInstance) => {
+    setCanvas(canvasInstance);
+    setFabric(fabricInstance);
+  }, []);
+
+  const handleSelectTemplate = (svgPath) => {
+    if (!canvas || !fabric) return;
+
+    canvas.clear(); // Clear previous template
+
+    fabric.loadSVGFromURL(svgPath, (objects, options) => {
+      const obj = fabric.util.groupSVGElements(objects, options);
+
+      const canvasWidth = canvas.getWidth();
+      const canvasHeight = canvas.getHeight();
+
+      // Scale the object to fit the canvas while maintaining aspect ratio
+      const scale = Math.min(
+        canvasWidth / obj.width,
+        canvasHeight / obj.height
+      );
+      obj.scale(scale);
+
+      canvas.add(obj).centerObject(obj).renderAll();
+    });
+  };
 
   return (
-    <div className="min-h-screen p-6">
-      <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2">
-          <CanvasEditor template={template} />
-        </div>
-        <div>
-          <div className="bg-white p-4 rounded shadow">
-            <h3 className="font-semibold mb-2">Preview (3D)</h3>
-            <p className="text-sm mb-4">
-              A simple 3D preview area using @react-three/fiber. Drop GLTF
-              models into <code>/public/models</code>.
-            </p>
-            <div style={{ height: 300 }} className="border rounded">
-              {/* 3D preview loaded client-side inside CanvasEditor (or separate component) */}
-              <p className="p-4">3D preview will appear here.</p>
-            </div>
+    <div className="flex flex-col h-screen">
+      <Navbar />
+      <div className="flex-grow">
+        <div className="grid grid-cols-12 h-full">
+          {/* Left Column */}
+          <div className="col-span-2 bg-gray-100 p-4 overflow-y-auto">
+            <TemplatePanel onSelectTemplate={handleSelectTemplate} />
+            <LayersPanel canvas={canvas} />
           </div>
 
-          <div className="bg-white p-4 rounded shadow mt-4">
-            <h4 className="font-semibold">Save & Export</h4>
-            <p className="text-sm">
-              Use controls on the canvas area to save to server or download
-              PNG/SVG.
-            </p>
+          {/* Center Column (Canvas) */}
+          <div className="col-span-7 flex items-center justify-center bg-gray-200 p-4">
+            <CanvasEditor onReady={handleCanvasReady} />
+          </div>
+
+          {/* Right Column */}
+          <div className="col-span-3 bg-gray-100 p-4">
+            <EditorToolbar canvas={canvas} fabric={fabric} />
+            <ObjectPanel />
           </div>
         </div>
       </div>
