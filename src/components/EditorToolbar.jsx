@@ -29,11 +29,19 @@ export default function EditorToolbar({ canvas, fabric }) {
     }, 0);
   };
 
-  const changeFont = (fontFamily) => {
+  const changeFont = async (fontFamily) => {
     const obj = canvas.getActiveObject();
     if (obj && obj.type === "textbox") {
-      obj.set({ fontFamily });
-      canvas.renderAll();
+      try {
+        await document.fonts.load(`1em "${fontFamily}"`);
+        obj.set({ fontFamily });
+        canvas.renderAll();
+      } catch (error) {
+        console.error(`Font ${fontFamily} could not be loaded`, error);
+        // Fallback: still try to set the font
+        obj.set({ fontFamily });
+        canvas.renderAll();
+      }
     }
   };
 
@@ -52,6 +60,56 @@ export default function EditorToolbar({ canvas, fabric }) {
       canvas.renderAll();
     }
   };
+
+  const fonts = [
+    "Amatic SC",
+    "Anton",
+    "Arial",
+    "Arimo",
+    "Bebas Neue",
+    "Caveat",
+    "Comic Sans MS",
+    "Cormorant",
+    "Courier New",
+    "Dancing Script",
+    "EB Garamond",
+    "Fauna One",
+    "Fjalla One",
+    "Georgia",
+    "Impact",
+    "Indie Flower",
+    "Josefin Sans",
+    "Lato",
+    "Limelight",
+    "Lobster",
+    "Merriweather",
+    "Monoton",
+    "Montserrat",
+    "Noto Sans",
+    "Open Sans",
+    "Oswald",
+    "PT Sans",
+    "Pacifico",
+    "Palatino",
+    "Philosopher",
+    "Playfair Display",
+    "Poppins",
+    "Quicksand",
+    "Raleway",
+    "Roboto",
+    "Slabo 27px",
+    "Source Sans Pro",
+    "Tahoma",
+    "Teko",
+    "Times New Roman",
+    "Trebuchet MS",
+    "Trirong",
+    "Ubuntu",
+    "UnifrakturMaguntia",
+    "Varela Round",
+    "Verdana",
+    "Yanone Kaffeesatz",
+  ].sort();
 
   return (
     <div className="p-2 bg-gray-100 border-b">
@@ -73,10 +131,11 @@ export default function EditorToolbar({ canvas, fabric }) {
           onChange={(e) => changeFont(e.target.value)}
           className="border rounded px-1 py-1"
         >
-          <option value="Arial">Arial</option>
-          <option value="Times New Roman">Times New Roman</option>
-          <option value="Courier New">Courier New</option>
-          <option value="Verdana">Verdana</option>
+          {fonts.map((font) => (
+            <option key={font} value={font}>
+              {font}
+            </option>
+          ))}
         </select>
 
         <input

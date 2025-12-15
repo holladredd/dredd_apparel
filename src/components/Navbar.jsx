@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 export default function Navbar() {
@@ -9,7 +10,13 @@ export default function Navbar() {
             <div>
               <Link href="/" className="flex items-center py-4 px-2">
                 <span className="font-semibold text-gray-500 text-lg">
-                  Dredd Apparel
+                  <Image
+                    src="/logo/dredd-branding.png"
+                    alt="Dredd Apparel"
+                    width={100}
+                    height={50}
+                  />{" "}
+                  Dredd Appare
                 </span>
               </Link>
             </div>
