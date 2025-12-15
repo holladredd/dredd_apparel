@@ -1,46 +1,33 @@
 import { FaPlus, FaClone } from "react-icons/fa";
 
-export default function LayerActions({ canvas, fabric }) {
-  if (!canvas || !fabric) return null;
-
-  /* ---------------- ADD PAINT LAYER ---------------- */
+export default function LayerActions({ objects, setObjects, selectedId }) {
   const addPaintLayer = () => {
-    const layerCount = canvas.getObjects().length + 1;
-
-    const paintLayer = new fabric.Rect({
-      left: 0,
-      top: 0,
-      width: canvas.getWidth(),
-      height: canvas.getHeight(),
-      fill: "rgba(0,0,0,0)", // transparent
-      selectable: true,
-      evented: true,
-      hasBorders: false,
-      hasControls: false,
-      name: `Paint Layer ${layerCount}`,
-    });
-
-    canvas.add(paintLayer);
-    canvas.setActiveObject(paintLayer);
-    canvas.renderAll();
+    const newRect = {
+      id: `rect-${Date.now()}`,
+      type: "rect",
+      x: 20,
+      y: 20,
+      width: 100,
+      height: 100,
+      fill: "rgba(0,0,0,0)",
+      stroke: "black",
+      strokeWidth: 1,
+      draggable: true,
+    };
+    setObjects((prev) => [...prev, newRect]);
   };
 
-  /* ---------------- DUPLICATE LAYER ---------------- */
   const duplicateLayer = () => {
-    const active = canvas.getActiveObject();
-    if (!active) return;
+    const selectedObject = objects.find((obj) => obj.id === selectedId);
+    if (!selectedObject) return;
 
-    active.clone((cloned) => {
-      cloned.set({
-        left: active.left + 20,
-        top: active.top + 20,
-        name: `${active.name || "Layer"} copy`,
-      });
-
-      canvas.add(cloned);
-      canvas.setActiveObject(cloned);
-      canvas.renderAll();
-    });
+    const newObject = {
+      ...selectedObject,
+      id: `${selectedObject.type}-${Date.now()}`,
+      x: selectedObject.x + 20,
+      y: selectedObject.y + 20,
+    };
+    setObjects((prev) => [...prev, newObject]);
   };
 
   return (

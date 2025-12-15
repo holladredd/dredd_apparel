@@ -1,61 +1,108 @@
-import { useEffect, useRef, memo } from "react";
+import { Stage, Layer } from "react-konva";
+import { TOOLS } from "./toolbar/tools";
+import TextNode from "./konvas/TextNode";
+import RectNode from "./konvas/RectNode";
+import LineNode from "./konvas/LineNode";
 
-function CanvasEditor({ onReady }) {
-  const canvasRef = useRef(null);
-  const instanceRef = useRef(null);
+const CanvasEditor = ({
+  objects,
+  setObjects,
+  activeTool,
+  selectedId,
+  setSelectedId,
+}) => {
+  const handleDragEnd = (e) => {
+    const id = e.target.id();
+    const newObjects = objects.map((obj) => {
+      if (obj.id === id) {
+        return {
+          ...obj,
+          x: e.target.x(),
+          y: e.target.y(),
+        };
+      }
+      return obj;
+    });
+    setObjects(newObjects);
+  };
 
-  useEffect(() => {
-    if (instanceRef.current) return;
-
-    async function initFabric() {
-      const fabricModule = await import("fabric");
-      const fabric = fabricModule.fabric || fabricModule;
-
-      // Default settings for all objects
-      fabric.Object.prototype.set({
-        cornerStyle: "circle",
-        cornerColor: "#2563eb",
-        borderColor: "#2563eb",
-        cornerSize: 10,
-        transparentCorners: false,
-        hasRotatingPoint: true,
-        lockScalingFlip: false,
-        selectable: true,
-        evented: true,
-      });
-
-      const canvas = new fabric.Canvas(canvasRef.current, {
-        width: 800,
-        height: 600,
-        backgroundColor: "#f3f4f6",
-        selection: true,
-        preserveObjectStacking: true,
-      });
-
-      // Double click to edit text
-      canvas.on("mouse:dblclick", (opt) => {
-        const target = opt.target;
-        if (target && target.type === "textbox") {
-          target.enterEditing();
-          target.hiddenTextarea?.focus();
-        }
-      });
-
-      instanceRef.current = canvas;
-      if (onReady) onReady(canvas, fabric);
+  const handleSelect = (e) => {
+    const id = e.target.id();
+    if (activeTool === TOOLS.MOVE || activeTool === TOOLS.TEXT) {
+      setSelectedId(id);
     }
-
-    initFabric();
-  }, [onReady]);
+  };
 
   return (
     <div className="border rounded-lg p-2 bg-white shadow-inner">
-      <canvas ref={canvasRef} tabIndex={0} className="outline-none" />
+      <Stage
+        width={800}
+        height={600}
+        className="bg-gray-100"
+        onClick={handleSelect}
+      >
+        <Layer>
+          {objects.map((obj) => {
+            switch (obj.type) {
+              case "text":
+                return (
+                  <TextNode
+                    key={obj.id}
+                    shapeProps={obj}
+                    isSelected={obj.id === selectedId}
+                    onSelect={() => setSelectedId(obj.id)}
+                    onChange={(newAttrs) => {
+                      const newObjects = objects.map((o) =>
+                        o.id === obj.id ? { ...o, ...newAttrs } : o
+                      );
+                      setObjects(newObjects);
+                    }}
+                    activeTool={activeTool}
+                  />
+                );
+              case "rect":
+                return (
+                  <RectNode
+                    key={obj.id}
+                    shapeProps={obj}
+                    isSelected={obj.id === selectedId}
+                    onSelect={() => setSelectedId(obj.id)}
+                    onChange={(newAttrs) => {
+                      const newObjects = objects.map((o) =>
+                        o.id === obj.id ? { ...o, ...newAttrs } : o
+                      );
+                      setObjects(newObjects);
+                    }}
+                    activeTool={activeTool}
+                  />
+                );
+              case "line":
+                return (
+                  <LineNode
+                    key={obj.id}
+                    shapeProps={obj}
+                    isSelected={obj.id === selectedId}
+                    onSelect={() => setSelectedId(obj.id)}
+                    onChange={(newAttrs) => {
+                      const newObjects = objects.map((o) =>
+                        o.id === obj.id ? { ...o, ...newAttrs } : o
+                      );
+                      setObjects(newObjects);
+                    }}
+                    activeTool={activeTool}
+                  />
+                );
+              default:
+                return null;
+            }
+          })}
+        </Layer>
+      </Stage>
       <p className="text-xs text-gray-500 mt-2 text-center">
         Hint: Drag objects, resize using corners, double-click text to edit.
       </p>
     </div>
   );
-}
+};
 
-export default memo(CanvasEditor);
+export default CanvasEditor;

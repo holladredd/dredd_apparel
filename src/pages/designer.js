@@ -1,7 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
 import Navbar from "../components/Navbar";
 import EditorToolbar from "../components/toolbar/EditorToolbar";
-import CanvasEditor from "../components/CanvasEditor";
 import LayersPanel from "../components/LayersPanel";
 import ObjectPanel from "../components/ObjectPanel";
 import TemplatePanel from "../components/TemplatePanel";
@@ -11,84 +10,39 @@ import { TOOLS } from "../components/toolbar/tools";
 import LayerActions from "@/components/LayerActions";
 import LogoButton from "@/components/LogoButton";
 import LogoPanel from "@/components/LogoPanel";
+import dynamic from "next/dynamic";
+
+const CanvasEditor = dynamic(() => import("../components/CanvasEditor"), {
+  ssr: false,
+});
 
 export default function Designer() {
-  const [canvas, setCanvas] = useState(null);
-  const [fabric, setFabric] = useState(null);
   const [isTemplatePanelOpen, setIsTemplatePanelOpen] = useState(false);
   const [isLogoPanelOpen, setIsLogoPanelOpen] = useState(false);
   const [activeTool, setActiveTool] = useState(TOOLS.MOVE);
+  const [objects, setObjects] = useState([]);
+  const [selectedId, setSelectedId] = useState(null);
 
-  // Sync Move tool and other modes
-  useEffect(() => {
-    if (!canvas) return;
-    switch (activeTool) {
-      case TOOLS.MOVE:
-      case TOOLS.SELECT:
-      case TOOLS.TEXT:
-        canvas.isDrawingMode = false;
-        canvas.selection = true;
-        canvas.forEachObject((o) => {
-          o.selectable = true;
-          o.evented = true;
-        });
-        break;
-      case TOOLS.BRUSH:
-      case TOOLS.ERASER:
-        canvas.isDrawingMode = true;
-        canvas.selection = false;
-        canvas.forEachObject((o) => {
-          o.selectable = false;
-          o.evented = false;
-        });
-        break;
-      default:
-        canvas.isDrawingMode = false;
-        canvas.selection = true;
-    }
-  }, [activeTool, canvas]);
-
-  const handleCanvasReady = useCallback((canvasInstance, fabricInstance) => {
-    setCanvas(canvasInstance);
-    setFabric(fabricInstance);
+  const handleSelectTemplate = useCallback((svgPath) => {
+    // TODO: Implement SVG loading with Konva
+    console.log("Load template:", svgPath);
   }, []);
-
-  const handleSelectTemplate = useCallback(
-    (svgPath) => {
-      if (!canvas || !fabric) return;
-      canvas.clear();
-
-      fabric.loadSVGFromURL(svgPath, (objects, options) => {
-        const obj = fabric.util.groupSVGElements(objects, options);
-        const scale = Math.min(
-          canvas.getWidth() / obj.width,
-          canvas.getHeight() / obj.height
-        );
-        obj.scale(scale);
-        canvas.add(obj).centerObject(obj).renderAll();
-      });
-    },
-    [canvas, fabric]
-  );
 
   const toggleTemplatePanel = () => {
     setIsTemplatePanelOpen((prev) => !prev);
+    if (isLogoPanelOpen) setIsLogoPanelOpen(false);
   };
-  const handleSelectLogo = useCallback(
-    (svgPath) => {
-      if (!canvas || !fabric) return;
-      fabric.loadSVGFromURL(svgPath, (objects, options) => {
-        const obj = fabric.util.groupSVGElements(objects, options);
-        obj.scaleToWidth(100);
-        canvas.add(obj).centerObject(obj).renderAll();
-      });
-    },
-    [canvas, fabric]
-  );
+
+  const handleSelectLogo = useCallback((svgPath) => {
+    // TODO: Implement SVG loading with Konva
+    console.log("Load logo:", svgPath);
+  }, []);
 
   const toggleLogoPanel = () => {
     setIsLogoPanelOpen((prev) => !prev);
+    if (isTemplatePanelOpen) setIsTemplatePanelOpen(false);
   };
+
   return (
     <div className="flex flex-col h-screen">
       <Navbar />
@@ -109,30 +63,35 @@ export default function Designer() {
               <FaThLarge size={24} />
             </button>
             <EditorToolbar
-              canvas={canvas}
-              fabric={fabric}
               activeTool={activeTool}
               setActiveTool={setActiveTool}
+              setObjects={setObjects}
             />
+            <LogoButton onClick={toggleLogoPanel} isOpen={isLogoPanelOpen} />
           </div>
 
-          {/* Collapsible Template Panel */}
+          {/* Collapsible Panels */}
           <div
             className={`transition-all duration-300 ease-in-out bg-gray-100 overflow-y-auto border-r ${
-              isTemplatePanelOpen ? "w-80 p-4" : "w-0"
+              isTemplatePanelOpen || isLogoPanelOpen ? "w-80 p-4" : "w-0"
             }`}
           >
             {isTemplatePanelOpen && (
               <TemplatePanel onSelectTemplate={handleSelectTemplate} />
             )}
-            <LogoButton onClick={toggleLogoPanel} isOpen={isLogoPanelOpen} />
             {isLogoPanelOpen && <LogoPanel onSelectLogo={handleSelectLogo} />}
           </div>
         </div>
 
         {/* Center Column (Canvas) */}
         <div className="flex-grow flex items-center justify-center bg-gray-200 p-4">
-          <CanvasEditor onReady={handleCanvasReady} />
+          <CanvasEditor
+            objects={objects}
+            setObjects={setObjects}
+            activeTool={activeTool}
+            selectedId={selectedId}
+            setSelectedId={setSelectedId}
+          />
         </div>
 
         {/* Right Column */}
@@ -141,16 +100,22 @@ export default function Designer() {
             <ToolSettings
               activeTool={activeTool}
               setActiveTool={setActiveTool}
-              canvas={canvas}
-              fabric={fabric}
+              selectedId={selectedId}
+              objects={objects}
+              setObjects={setObjects}
             />
             <ObjectPanel />
-            <LayersPanel canvas={canvas} />
+            <LayersPanel
+              objects={objects}
+              setObjects={setObjects}
+              selectedId={selectedId}
+              setSelectedId={setSelectedId}
+            />
           </div>
           {/* Bottom Actions */}
           <div className="mt-auto">
-            <LayerActions canvas={canvas} fabric={fabric} />
-          </div>{" "}
+            <LayerActions />
+          </div>
         </div>
       </div>
     </div>

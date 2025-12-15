@@ -1,26 +1,51 @@
+import BrushSettingsBrowser from "../tool-settings/BrushSettingsBrowser";
+import EraserSettingsBrowser from "../tool-settings/EraserSettingsBrowser";
+import MoveSettingsBrowser from "../tool-settings/MoveSettingsBrowser";
+import TextSettingsBrowser from "../tool-settings/TextSettingsBrowser";
 import { TOOLS } from "./tools";
-import TextSettings from "../tool-settings/TextSettings";
-import BrushSettings from "../tool-settings/BrushSettings";
-import EraserSettings from "../tool-settings/EraserSettings";
-import MoveSettings from "../tool-settings/MoveSettings";
 
-export default function ToolSettings({ activeTool, canvas, fabric }) {
-  if (!canvas) return null;
+export default function ToolSettings({
+  activeTool,
+  setActiveTool,
+  selectedId,
+  objects,
+  setObjects,
+  brushColor,
+  setBrushColor,
+  brushWidth,
+  setBrushWidth,
+  finishDrawing,
+  setSelectedId,
+}) {
+  return (
+    <div className="bg-white rounded p-4 shadow mb-4 space-y-4">
+      {activeTool === TOOLS.TEXT && (
+        <TextSettingsBrowser
+          selectedId={selectedId}
+          objects={objects}
+          setObjects={setObjects}
+          setActiveTool={setActiveTool}
+          setSelectedId={setSelectedId}
+        />
+      )}
 
-  switch (activeTool) {
-    case TOOLS.MOVE:
-      return <MoveSettings canvas={canvas} />;
+      {activeTool === TOOLS.BRUSH && (
+        <BrushSettingsBrowser
+          color={brushColor}
+          setColor={setBrushColor}
+          width={brushWidth}
+          setWidth={setBrushWidth}
+          finishDrawing={finishDrawing}
+        />
+      )}
 
-    case TOOLS.TEXT:
-      return <TextSettings canvas={canvas} fabric={fabric} />;
+      {activeTool === TOOLS.ERASER && (
+        <EraserSettingsBrowser width={brushWidth} setWidth={setBrushWidth} />
+      )}
 
-    case TOOLS.BRUSH:
-      return <BrushSettings canvas={canvas} fabric={fabric} />;
-
-    case TOOLS.ERASER:
-      return <EraserSettings canvas={canvas} fabric={fabric} />;
-
-    default:
-      return null;
-  }
+      {activeTool === TOOLS.MOVE && (
+        <MoveSettingsBrowser selectedId={selectedId} setObjects={setObjects} />
+      )}
+    </div>
+  );
 }

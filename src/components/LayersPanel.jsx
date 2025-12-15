@@ -11,20 +11,20 @@ import {
 
 import {
   DndContext,
-  closestCenter,
   PointerSensor,
+  closestCenter,
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
 import {
-  arrayMove,
   SortableContext,
-  verticalListSortingStrategy,
+  arrayMove,
   useSortable,
+  verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
-// Sortable layer component
+/* ---------- sortable item ---------- */
 function LayerItem({
   obj,
   selectObject,
@@ -36,14 +36,12 @@ function LayerItem({
   activeId,
 }) {
   const { attributes, listeners, setNodeRef, transform, transition } =
-    useSortable({
-      id: obj.__uid,
-    });
+    useSortable({ id: obj.id });
 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    border: obj === activeId ? "2px solid #2563eb" : "1px solid transparent",
+    border: obj.id === activeId ? "2px solid #2563eb" : "1px solid transparent",
   };
 
   return (
@@ -53,14 +51,14 @@ function LayerItem({
       {...attributes}
       {...listeners}
       className="p-2 mb-2 bg-white rounded space-y-1 shadow-sm flex flex-col justify-between items-center cursor-pointer"
-      onClick={() => selectObject(obj)}
+      onClick={() => selectObject(obj.id)}
     >
       <span className="capitalize w-full">{obj.type}</span>
       <div className="flex space-x-1 w-full justify-end z-10">
         <button
           onClick={(e) => {
             e.stopPropagation();
-            moveUp(obj);
+            moveUp(obj.id);
           }}
           className="px-1 py-0.5 border rounded text-xs"
         >
@@ -69,7 +67,7 @@ function LayerItem({
         <button
           onClick={(e) => {
             e.stopPropagation();
-            moveDown(obj);
+            moveDown(obj.id);
           }}
           className="px-1 py-0.5 border rounded text-xs"
         >
@@ -78,7 +76,7 @@ function LayerItem({
         <button
           onClick={(e) => {
             e.stopPropagation();
-            toggleVisibility(obj);
+            toggleVisibility(obj.id);
           }}
           className="px-1 py-0.5 border rounded text-xs"
         >
@@ -87,16 +85,16 @@ function LayerItem({
         <button
           onClick={(e) => {
             e.stopPropagation();
-            toggleLock(obj);
+            toggleLock(obj.id);
           }}
           className="px-1 py-0.5 border rounded text-xs"
         >
-          {obj.selectable ? <FaLockOpen /> : <FaLock />}
+          {obj.draggable ? <FaLockOpen /> : <FaLock />}
         </button>
         <button
           onClick={(e) => {
             e.stopPropagation();
-            deleteObject(obj);
+            deleteObject(obj.id);
           }}
           className="px-1 py-0.5 border rounded text-xs text-red-500"
         >
@@ -107,104 +105,53 @@ function LayerItem({
   );
 }
 
-export default function LayersPanel({ canvas }) {
-  const [objects, setObjects] = useState([]);
-  const [activeId, setActiveId] = useState(null);
-
+/* ---------- main panel ---------- */
+export default function LayersPanel({
+  objects,
+  setObjects,
+  selectedId,
+  setSelectedId,
+}) {
   const sensors = useSensors(useSensor(PointerSensor));
 
-  useEffect(() => {
-    if (!canvas) return;
+  const selectObject = (id) => setSelectedId(id);
 
-    // Give each object a unique id for DnD
-    canvas.getObjects().forEach((obj) => {
-      if (!obj.__uid) obj.__uid = Math.random().toString(36).substr(2, 9);
-    });
+  const toggleVisibility = (id) =>
+    setObjects((o) =>
+      o.map((x) => (x.id === id ? { ...x, visible: !x.visible } : x))
+    );
 
-    const updateLayers = () => {
-      setObjects([...canvas.getObjects()].reverse());
-      setActiveId(canvas.getActiveObject());
-    };
+  const toggleLock = (id) =>
+    setObjects((o) =>
+      o.map((x) => (x.id === id ? { ...x, draggable: !x.draggable } : x))
+    );
 
-    canvas.on("object:added", updateLayers);
-    canvas.on("object:removed", updateLayers);
-    canvas.on("object:modified", updateLayers);
-    updateLayers();
+  const deleteObject = (id) => setObjects((o) => o.filter((x) => x.id !== id));
 
-    return () => {
-      if (canvas.off) {
-        canvas.off("object:added", updateLayers);
-        canvas.off("object:removed", updateLayers);
-        canvas.off("object:modified", updateLayers);
-      }
-    };
-  }, [canvas]);
-
-  const selectObject = (obj) => {
-    canvas.setActiveObject(obj);
-    canvas.renderAll();
-    setActiveId(obj);
+  const moveUp = (id) => {
+    const idx = objects.findIndex((o) => o.id === id);
+    if (idx === -1 || idx === objects.length - 1) return;
+    setObjects(arrayMove(objects, idx, idx + 1));
   };
 
-  const toggleVisibility = (obj) => {
-    obj.visible = !obj.visible;
-    canvas.renderAll();
-    setObjects([...canvas.getObjects()].reverse());
-  };
-
-  const toggleLock = (obj) => {
-    obj.selectable = !obj.selectable;
-    obj.evented = obj.selectable;
-    canvas.renderAll();
-    setObjects([...canvas.getObjects()].reverse());
-  };
-
-  const deleteObject = (obj) => {
-    canvas.remove(obj);
-    canvas.discardActiveObject();
-    canvas.renderAll();
-  };
-
-  const moveUp = (obj) => {
-    canvas.bringForward(obj);
-    canvas.renderAll();
-    setObjects([...canvas.getObjects()].reverse());
-  };
-
-  const moveDown = (obj) => {
-    canvas.sendBackwards(obj);
-    canvas.renderAll();
-    setObjects([...canvas.getObjects()].reverse());
+  const moveDown = (id) => {
+    const idx = objects.findIndex((o) => o.id === id);
+    if (idx <= 0) return;
+    setObjects(arrayMove(objects, idx, idx - 1));
   };
 
   const handleDragEnd = (event) => {
     const { active, over } = event;
-    if (!active || !over) return;
-
-    if (active.id !== over.id) {
-      const oldIndex = objects.findIndex((obj) => obj.__uid === active.id);
-      const newIndex = objects.findIndex((obj) => obj.__uid === over.id);
-
-      const newObjects = arrayMove(objects, oldIndex, newIndex);
-      setObjects(newObjects);
-
-      // Update canvas stacking
-      newObjects
-        .slice()
-        .reverse()
-        .forEach((obj, i) => {
-          canvas.moveTo(obj, i);
-        });
-      canvas.renderAll();
-    }
+    if (!active || !over || active.id === over.id) return;
+    const oldIndex = objects.findIndex((o) => o.id === active.id);
+    const newIndex = objects.findIndex((o) => o.id === over.id);
+    setObjects(arrayMove(objects, oldIndex, newIndex));
   };
 
   return (
     <div className="py-4 bg-gray-100 rounded-lg">
       <h3 className="text-lg font-semibold mb-4">Layers</h3>
-      {!canvas ? (
-        <p className="text-sm text-gray-500">Loading...</p>
-      ) : objects.length === 0 ? (
+      {objects.length === 0 ? (
         <p className="text-sm text-gray-500">No layers yet</p>
       ) : (
         <DndContext
@@ -213,13 +160,13 @@ export default function LayersPanel({ canvas }) {
           onDragEnd={handleDragEnd}
         >
           <SortableContext
-            items={objects.map((obj) => obj.__uid)}
+            items={objects.map((obj) => obj.id)}
             strategy={verticalListSortingStrategy}
           >
             <ul>
-              {objects.map((obj, index) => (
+              {objects.map((obj) => (
                 <LayerItem
-                  key={`${obj.type}-${index}`}
+                  key={obj.id}
                   obj={obj}
                   selectObject={selectObject}
                   moveUp={moveUp}
@@ -227,7 +174,7 @@ export default function LayersPanel({ canvas }) {
                   toggleVisibility={toggleVisibility}
                   toggleLock={toggleLock}
                   deleteObject={deleteObject}
-                  activeId={activeId}
+                  activeId={selectedId}
                 />
               ))}
             </ul>
