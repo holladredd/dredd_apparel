@@ -1,4 +1,6 @@
-export default function EditorToolbar({ canvas, fabric }) {
+import { TOOLS } from "../toolbar/tools";
+
+export default function TextSettings({ canvas, fabric, setActiveTool }) {
   const addText = () => {
     if (!canvas || !fabric) return;
 
@@ -21,6 +23,7 @@ export default function EditorToolbar({ canvas, fabric }) {
     canvas.add(text);
     canvas.setActiveObject(text);
     canvas.renderAll();
+    setActiveTool(TOOLS.TEXT);
 
     setTimeout(() => {
       canvas.setActiveObject(text);
@@ -112,20 +115,13 @@ export default function EditorToolbar({ canvas, fabric }) {
   ].sort();
 
   return (
-    <div className="p-2 bg-gray-100 border-b">
-      {canvas ? (
-        <div className="flex items-center space-x-2">
-          <button
-            onClick={addText}
-            className="px-3 py-1 bg-white border rounded shadow-sm hover:bg-gray-50"
-          >
-            Add Text
-          </button>
-        </div>
-      ) : (
-        <div className="text-sm text-gray-500">Initializing Canvas...</div>
-      )}
-
+    <div>
+      <button
+        onClick={addText}
+        className="w-full bg-blue-500 text-white py-2 rounded-lg mb-4"
+      >
+        Add Text
+      </button>
       <div className="flex items-center space-x-2 mt-2">
         <select
           onChange={(e) => changeFont(e.target.value)}

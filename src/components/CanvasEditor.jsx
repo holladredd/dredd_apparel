@@ -2,7 +2,6 @@ import { useEffect, useRef, memo } from "react";
 
 function CanvasEditor({ onReady }) {
   const canvasRef = useRef(null);
-  const fabricRef = useRef(null);
   const instanceRef = useRef(null);
 
   useEffect(() => {
@@ -25,17 +24,15 @@ function CanvasEditor({ onReady }) {
         evented: true,
       });
 
-      fabricRef.current = fabric;
-
       const canvas = new fabric.Canvas(canvasRef.current, {
-        width: 600,
+        width: 800,
         height: 600,
         backgroundColor: "#f3f4f6",
         selection: true,
         preserveObjectStacking: true,
       });
 
-      // Enable double click to edit text
+      // Double click to edit text
       canvas.on("mouse:dblclick", (opt) => {
         const target = opt.target;
         if (target && target.type === "textbox") {
@@ -45,17 +42,14 @@ function CanvasEditor({ onReady }) {
       });
 
       instanceRef.current = canvas;
-
-      if (onReady) {
-        onReady(canvas, fabric);
-      }
+      if (onReady) onReady(canvas, fabric);
     }
 
     initFabric();
   }, [onReady]);
 
   return (
-    <div className="border rounded-lg p-4 bg-white shadow-inner">
+    <div className="border rounded-lg p-2 bg-white shadow-inner">
       <canvas ref={canvasRef} tabIndex={0} className="outline-none" />
       <p className="text-xs text-gray-500 mt-2 text-center">
         Hint: Drag objects, resize using corners, double-click text to edit.
