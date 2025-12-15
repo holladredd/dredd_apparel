@@ -9,11 +9,14 @@ import { FaThLarge } from "react-icons/fa";
 import ToolSettings from "../components/toolbar/ToolSettings";
 import { TOOLS } from "../components/toolbar/tools";
 import LayerActions from "@/components/LayerActions";
+import LogoButton from "@/components/LogoButton";
+import LogoPanel from "@/components/LogoPanel";
 
 export default function Designer() {
   const [canvas, setCanvas] = useState(null);
   const [fabric, setFabric] = useState(null);
   const [isTemplatePanelOpen, setIsTemplatePanelOpen] = useState(false);
+  const [isLogoPanelOpen, setIsLogoPanelOpen] = useState(false);
   const [activeTool, setActiveTool] = useState(TOOLS.MOVE);
 
   // Sync Move tool and other modes
@@ -71,7 +74,21 @@ export default function Designer() {
   const toggleTemplatePanel = () => {
     setIsTemplatePanelOpen((prev) => !prev);
   };
+  const handleSelectLogo = useCallback(
+    (svgPath) => {
+      if (!canvas || !fabric) return;
+      fabric.loadSVGFromURL(svgPath, (objects, options) => {
+        const obj = fabric.util.groupSVGElements(objects, options);
+        obj.scaleToWidth(100);
+        canvas.add(obj).centerObject(obj).renderAll();
+      });
+    },
+    [canvas, fabric]
+  );
 
+  const toggleLogoPanel = () => {
+    setIsLogoPanelOpen((prev) => !prev);
+  };
   return (
     <div className="flex flex-col h-screen">
       <Navbar />
@@ -108,6 +125,8 @@ export default function Designer() {
             {isTemplatePanelOpen && (
               <TemplatePanel onSelectTemplate={handleSelectTemplate} />
             )}
+            <LogoButton onClick={toggleLogoPanel} isOpen={isLogoPanelOpen} />
+            {isLogoPanelOpen && <LogoPanel onSelectLogo={handleSelectLogo} />}
           </div>
         </div>
 

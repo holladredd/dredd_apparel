@@ -27,22 +27,19 @@ export default function TemplatePanel({ onSelectTemplate }) {
   return (
     <div className="p-4 bg-gray-100 rounded-lg">
       <h3 className="text-lg font-semibold mb-4">Templates</h3>
-      <div className="flex space-x-4 overflow-x-auto pb-2">
+      <div className="grid grid-cols-2 gap-4 overflow-y-auto max-h-[200px]">
         {templates.map((template) => (
           <div
             key={template.name}
             onClick={() => onSelectTemplate(template.path)}
-            className="flex-shrink-0 w-24 h-24 p-2 bg-white rounded shadow-sm cursor-pointer hover:ring-2 hover:ring-blue-500"
+            className="border rounded-lg p-2 cursor-pointer hover:bg-gray-200"
             title={template.name}
           >
-            <div className="relative w-full h-full">
-              <Image
-                src={template.path}
-                alt={template.name}
-                layout="fill"
-                objectFit="contain"
-              />
-            </div>
+            <img
+              src={template.path}
+              alt={template.name}
+              className="w-full h-auto"
+            />
           </div>
         ))}
       </div>
