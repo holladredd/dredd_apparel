@@ -48,13 +48,20 @@ function LayerItem({
     <li
       ref={setNodeRef}
       style={style}
-      {...attributes}
-      {...listeners}
-      className="p-2 mb-2 bg-white rounded space-y-1 shadow-sm flex flex-col justify-between items-center cursor-pointer"
-      onClick={() => selectObject(obj.id)}
+      className="p-2 mb-2 bg-white rounded shadow-sm flex justify-between items-center cursor-pointer"
+      onClick={() => selectObject(obj.id)} // row click = select
     >
-      <span className="capitalize w-full">{obj.type}</span>
-      <div className="flex space-x-1 w-full justify-end z-10">
+      {/* drag handle = layer name */}
+      <span
+        className="capitalize cursor-move"
+        {...attributes}
+        {...listeners} // ONLY here
+      >
+        {obj.type}
+      </span>
+
+      {/* buttons – NO listeners */}
+      <div className="flex space-x-1">
         <button
           onClick={(e) => {
             e.stopPropagation();

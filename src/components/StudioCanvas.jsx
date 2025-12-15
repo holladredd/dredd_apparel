@@ -92,6 +92,8 @@ export default function Studio() {
           y: 200,
           width: 300,
           height: 300,
+          visible: true,
+
           draggable: true,
         },
       ]);
@@ -157,6 +159,16 @@ export default function Studio() {
     return () => window.removeEventListener("keydown", onKey);
   }, [selectedId]);
 
+  /* ---------- one-time migration: ensure visible & draggable exist ---------- */
+  useEffect(() => {
+    setObjects((o) =>
+      o.map((x) => ({
+        ...x,
+        visible: x.visible === undefined ? true : x.visible,
+        draggable: x.draggable === undefined ? true : x.draggable,
+      }))
+    );
+  }, []); // << empty array = run only once
   /* ---------- render ---------- */
   return (
     <div className="flex flex-col h-screen bg-neutral-900 text-white">

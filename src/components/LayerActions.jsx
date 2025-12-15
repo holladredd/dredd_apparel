@@ -11,7 +11,8 @@ export default function LayerActions({ objects, setObjects, selectedId }) {
       height: 100,
       fill: "rgba(0,0,0,0)",
       stroke: "black",
-      strokeWidth: 1,
+      strokeWidth: 3,
+      visible: true, // << add
       draggable: true,
     };
     setObjects((prev) => [...prev, newRect]);

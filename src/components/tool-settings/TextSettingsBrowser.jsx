@@ -75,6 +75,8 @@ export default function TextSettingsBrowser({
             fontSize: 24,
             fill: "#000",
             fontFamily: "Arial",
+            editable: true,
+            visible: true,
             draggable: true,
           };
           setObjects((o) => [...o, newText]);

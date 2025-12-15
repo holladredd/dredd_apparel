@@ -16,7 +16,7 @@ export default function Home() {
           </p>
           <div className="flex justify-center gap-4">
             <Link
-              href="/designer"
+              href="/studio"
               className="bg-white text-black px-6 py-3 rounded"
             >
               Start Designing
