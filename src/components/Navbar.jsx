@@ -3,38 +3,24 @@ import Link from "next/link";
 
 export default function Navbar() {
   return (
-    <nav className="bg-white shadow-md">
-      <div className="max-w-6xl mx-auto px-4">
-        <div className="flex justify-between">
-          <div className="flex space-x-7">
-            <div>
-              <Link href="/" className="flex items-center py-4 px-2">
-                <span className="font-semibold text-gray-500 text-lg">
-                  <Image
-                    src="/logo/dredd-branding.png"
-                    alt="Dredd Apparel"
-                    width={100}
-                    height={50}
-                  />{" "}
-                  Dredd Appare
-                </span>
-              </Link>
-            </div>
-            <div className="hidden md:flex items-center space-x-1">
-              <Link
-                href="/shop"
-                className="py-4 px-2 text-gray-500 font-semibold hover:text-green-500 transition duration-300"
-              >
-                Shop
-              </Link>
-              <Link
-                href="/designer"
-                className="py-4 px-2 text-gray-500 font-semibold hover:text-green-500 transition duration-300"
-              >
-                Designer
-              </Link>
-            </div>
-          </div>
+    <nav className="bg-gray-800 text-white px-4 py-2">
+      <div className="container mx-auto flex justify-between">
+        <Link href="/" className="font-bold text-xl flex items-center">
+          <Image
+            src="/logo/dredd-branding.png"
+            alt="Dredd Apparel"
+            width={50}
+            height={50}
+          />{" "}
+          Dredd Apparel
+        </Link>
+        <div>
+          <Link href="/shop" className="px-4">
+            Shop
+          </Link>
+          <Link href="/studio" className="px-4">
+            Studio
+          </Link>
         </div>
       </div>
     </nav>
