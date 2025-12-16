@@ -17,24 +17,51 @@ export default function ToolSettings({
   finishDrawing,
   setSelectedId,
 }) {
+  const selectedObject = objects.find((o) => o.id === selectedId);
+
+  const handleColorChange = (e) => {
+    const newColor = e.target.value;
+    setObjects((prevObjects) =>
+      prevObjects.map((o) => {
+        if (o.id === selectedId) {
+          const newProps = {};
+          // Prioritize fill, then stroke for which property to change
+          if (o.hasOwnProperty("fill")) {
+            newProps.fill = newColor;
+          } else if (o.hasOwnProperty("stroke")) {
+            newProps.stroke = newColor;
+          }
+          return { ...o, ...newProps };
+        }
+        return o;
+      })
+    );
+  };
+
+  let colorProperty;
+  let colorValue = "#000000"; // Default color
+  if (selectedObject) {
+    if (selectedObject.hasOwnProperty("fill")) {
+      colorProperty = "Fill";
+      colorValue = selectedObject.fill;
+    } else if (selectedObject.hasOwnProperty("stroke")) {
+      colorProperty = "Stroke";
+      colorValue = selectedObject.stroke;
+    }
+  }
+
   return (
     <div className="bg-white rounded p-4 shadow mb-4 space-y-4">
-      {/* board colour – always visible when template exists */}
-      {objects.some((o) => o.isTemplate) && (
+      {/* Colour setting for selected object */}
+      {selectedObject && colorProperty && (
         <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
           <h3 className="text-sm font-semibold text-gray-700 mb-2">
-            Board Colour
+            {colorProperty} Colour
           </h3>
           <input
             type="color"
-            value={objects.find((o) => o.isTemplate)?.fill || "#FFFFFF"}
-            onChange={(e) =>
-              setObjects((o) =>
-                o.map((x) =>
-                  x.isTemplate ? { ...x, fill: e.target.value } : x
-                )
-              )
-            }
+            value={colorValue}
+            onChange={handleColorChange}
             className="w-full h-8 rounded cursor-pointer border-none"
           />
         </div>

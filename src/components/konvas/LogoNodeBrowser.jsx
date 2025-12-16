@@ -3,14 +3,8 @@ import { Image, Transformer } from "react-konva";
 import useImage from "use-image";
 import Konva from "konva";
 
-export default function ImageNodeBrowser({
-  shapeProps,
-  isSelected,
-  onChange,
-  loadedImage,
-}) {
+export default function LogoNodeBrowser({ shapeProps, isSelected, onChange }) {
   const [image, status] = useImage(shapeProps.imageUrl, "anonymous");
-  const finalImage = loadedImage || image;
   const shapeRef = useRef();
   const trRef = useRef();
 
@@ -19,10 +13,10 @@ export default function ImageNodeBrowser({
       trRef.current.nodes([shapeRef.current]);
       trRef.current.getLayer().batchDraw();
     }
-  }, [isSelected, finalImage]);
+  }, [isSelected]);
 
   useEffect(() => {
-    if (finalImage && shapeRef.current) {
+    if (status === "loaded" && shapeRef.current) {
       if (shapeProps.colorize) {
         shapeRef.current.cache();
       } else {
@@ -31,24 +25,27 @@ export default function ImageNodeBrowser({
       shapeRef.current.getLayer().batchDraw();
     }
   }, [
-    finalImage,
+    status,
     shapeProps.colorize,
     shapeProps.colorizeRed,
     shapeProps.colorizeGreen,
     shapeProps.colorizeBlue,
   ]);
 
-  if (!finalImage) return null;
-  if (!loadedImage && status !== "loaded") return null;
+  if (status !== "loaded") return null;
 
   return (
     <>
       <Image
         ref={shapeRef}
-        image={finalImage}
+        image={image}
         {...shapeProps}
-        draggable
-        onDragEnd={(e) => onChange({ x: e.target.x(), y: e.target.y() })}
+        draggable={shapeProps.draggable}
+        onDragEnd={(e) => {
+          if (shapeProps.draggable) {
+            onChange({ x: e.target.x(), y: e.target.y() });
+          }
+        }}
         onTransformEnd={() => {
           const node = shapeRef.current;
           const scaleX = node.scaleX();

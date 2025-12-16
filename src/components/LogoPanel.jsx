@@ -1,4 +1,5 @@
 import React from "react";
+import { nanoid } from "nanoid";
 
 const LogoPanel = ({ onSelectLogo }) => {
   // In a real app, you'd fetch these from a server or have a more robust system.
@@ -8,8 +9,19 @@ const LogoPanel = ({ onSelectLogo }) => {
     "/logo templates/monotom logo sample.svg",
   ];
 
+  const handleSelectLogo = (logoSrc) => {
+    const newImage = {
+      id: nanoid(),
+      component: "Image",
+      src: logoSrc,
+      x: 50,
+      y: 50,
+    };
+    setObjects((prevObjects) => [...prevObjects, newImage]);
+  };
+
   return (
-    <div>
+    <div className="mt-4">
       <h3 className="text-lg font-semibold mb-4">Logos</h3>
       <div className="grid grid-cols-2 gap-4">
         {logos.map((logo, index) => (

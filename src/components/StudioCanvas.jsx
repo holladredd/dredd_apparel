@@ -38,6 +38,12 @@ const ImageNode = dynamic(
     ssr: false,
   }
 );
+const LogoNodeBrowser = dynamic(
+  () => import("../components/konvas/LogoNodeBrowser"),
+  {
+    ssr: false,
+  }
+);
 
 /* ---------- main page component ---------- */
 export default function Studio() {
@@ -139,12 +145,20 @@ export default function Studio() {
       setTemplateColor("#FFFFFF");
     };
   }, []);
-  const handleSelectLogo = useCallback(
-    (svgPath) => {
-      handleSelectTemplate(svgPath);
-    },
-    [handleSelectTemplate]
-  );
+  const handleSelectLogo = useCallback((svgPath) => {
+    const newLogo = {
+      id: uuid(),
+      type: "logo",
+      imageUrl: svgPath,
+      x: 50,
+      y: 50,
+      width: 150,
+      height: 150,
+      visible: true,
+      draggable: true,
+    };
+    setObjects((o) => [...o, newLogo]);
+  }, []);
 
   const toggleTemplatePanel = () => {
     setIsTemplatePanelOpen((p) => !p);
@@ -269,7 +283,12 @@ export default function Studio() {
                 setObjects={setObjects}
               />
             )}
-            {isLogoPanelOpen && <LogoPanel onSelectLogo={handleSelectLogo} />}
+            {isLogoPanelOpen && (
+              <LogoPanel
+                onSelectLogo={handleSelectLogo}
+                setObjects={setObjects}
+              />
+            )}
           </div>
         </div>
 
@@ -407,6 +426,23 @@ export default function Studio() {
                           if (obj.type === "image")
                             return (
                               <ImageNode
+                                key={obj.id}
+                                shapeProps={obj}
+                                isSelected={obj.id === selectedId}
+                                onChange={(newAttrs) =>
+                                  setObjects((o) =>
+                                    o.map((x) =>
+                                      x.id === obj.id
+                                        ? { ...x, ...newAttrs }
+                                        : x
+                                    )
+                                  )
+                                }
+                              />
+                            );
+                          if (obj.type === "logo")
+                            return (
+                              <LogoNodeBrowser
                                 key={obj.id}
                                 shapeProps={obj}
                                 isSelected={obj.id === selectedId}

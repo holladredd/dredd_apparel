@@ -3,7 +3,7 @@ import { useMemo } from "react";
 /* ---------- tiny preview canvas ---------- */
 function Preview({ obj }) {
   const url = useMemo(() => {
-    if (obj.type === "image") return obj.imageUrl;
+    if (obj.type === "image" || obj.type === "logo") return obj.imageUrl;
     // text / rect / brush – return transparent 1×1 px
     return "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
   }, [obj]);
@@ -103,6 +103,126 @@ export default function ObjectPanel({ selectedId, objects, onChange }) {
       //       />
       //     </>
       //   );
+      case "image": {
+        const hexToRgb = (hex) => {
+          const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+          return result
+            ? {
+                r: parseInt(result[1], 16),
+                g: parseInt(result[2], 16),
+                b: parseInt(result[3], 16),
+              }
+            : null;
+        };
+
+        const rgbToHex = (r, g, b) =>
+          "#" +
+          [r, g, b]
+            .map((x) => {
+              const hex = x.toString(16);
+              return hex.length === 1 ? "0" + hex : hex;
+            })
+            .join("");
+
+        const colorHex = rgbToHex(
+          obj.colorizeRed || 0,
+          obj.colorizeGreen || 0,
+          obj.colorizeBlue || 0
+        );
+
+        return (
+          <>
+            <div className="flex items-center justify-between">
+              <label className="text-sm">Color Overlay</label>
+              <input
+                type="checkbox"
+                checked={!!obj.colorize}
+                onChange={(e) => update({ colorize: e.target.checked })}
+              />
+            </div>
+            {obj.colorize && (
+              <div className="mt-2">
+                <label className="text-sm">Tint Color</label>
+                <input
+                  type="color"
+                  value={colorHex}
+                  onChange={(e) => {
+                    const rgb = hexToRgb(e.target.value);
+                    if (rgb) {
+                      update({
+                        colorizeRed: rgb.r,
+                        colorizeGreen: rgb.g,
+                        colorizeBlue: rgb.b,
+                      });
+                    }
+                  }}
+                  className="w-full h-8 border rounded"
+                />
+              </div>
+            )}
+          </>
+        );
+      }
+      case "logo": {
+        const hexToRgb = (hex) => {
+          const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+          return result
+            ? {
+                r: parseInt(result[1], 16),
+                g: parseInt(result[2], 16),
+                b: parseInt(result[3], 16),
+              }
+            : null;
+        };
+
+        const rgbToHex = (r, g, b) =>
+          "#" +
+          [r, g, b]
+            .map((x) => {
+              const hex = x.toString(16);
+              return hex.length === 1 ? "0" + hex : hex;
+            })
+            .join("");
+
+        const colorHex = rgbToHex(
+          obj.colorizeRed || 0,
+          obj.colorizeGreen || 0,
+          obj.colorizeBlue || 0
+        );
+
+        return (
+          <>
+            <div className="flex items-center justify-between">
+              <label className="text-sm">Color Overlay</label>
+              <input
+                type="checkbox"
+                checked={!!obj.colorize}
+                onChange={(e) => update({ colorize: e.target.checked })}
+              />
+            </div>
+            {obj.colorize && (
+              <div className="mt-2">
+                <label className="text-sm">Tint Color</label>
+                <input
+                  type="color"
+                  value={colorHex}
+                  onChange={(e) => {
+                    const rgb = hexToRgb(e.target.value);
+                    if (rgb) {
+                      update({
+                        colorizeRed: rgb.r,
+                        colorizeGreen: rgb.g,
+                        colorizeBlue: rgb.b,
+                      });
+                    }
+                  }}
+                  className="w-full h-8 border rounded"
+                />
+              </div>
+            )}
+          </>
+        );
+      }
 
       case "brush":
         return (
