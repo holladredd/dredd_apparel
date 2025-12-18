@@ -73,7 +73,7 @@ export default function AboutPage() {
             <img
               src="/lookbook/look-1.jpg"
               alt="NOVARE Collection"
-              className="w-full h-64 md:h-80 object-cover"
+              className="w-full h-80 md:h-96 object-cover"
             />
           </div>
         </motion.div>

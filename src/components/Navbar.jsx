@@ -28,9 +28,9 @@ export default function Navbar() {
         setDropdownOpen(false);
       }
     };
-    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("click", handleClickOutside);
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("click", handleClickOutside);
     };
   }, [dropdownRef]);
 
@@ -219,12 +219,10 @@ export default function Navbar() {
           </div>
         </motion.div>
       )}
-      <div className="w-full h-screen flex items-center justify-center">
-        <LoginModal
-          isOpen={isLoginModalOpen}
-          onClose={() => setLoginModalOpen(false)}
-        />
-      </div>
+      <LoginModal
+        isOpen={isLoginModalOpen}
+        onClose={() => setLoginModalOpen(false)}
+      />
     </motion.div>
   );
 }
