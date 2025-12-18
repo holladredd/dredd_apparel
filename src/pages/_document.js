@@ -11,7 +11,7 @@ export default function Document() {
         <meta property="og:site_name" content="NØVÁRE" />
         <meta
           property="og:image"
-          content="https://novarewear.vercel.app/logo/novare2.svg"
+          content="https://novarewear.vercel.app/logo/novare.png"
         />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
