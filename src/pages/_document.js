@@ -7,6 +7,14 @@ export default function Document() {
         <link rel="icon" href="/logo/novare.svg" sizes="any" />
         <title>NØVÁRE</title>
         <meta name="description" content="Nothing Ordinary." />
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="NØVÁRE" />
+        <meta
+          property="og:image"
+          content="https://novarewear.vercel.app/logo/novare2.svg"
+        />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
       </Head>
       <body className="antialiased">
         <Main />
