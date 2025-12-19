@@ -1,5 +1,5 @@
-import { SessionProvider } from "next-auth/react";
 import "@/styles/globals.css";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import "@fontsource/amatic-sc";
 import "@fontsource/anton";
@@ -38,12 +38,20 @@ import "@fontsource/ubuntu";
 import "@fontsource/unifrakturmaguntia";
 import "@fontsource/varela-round";
 import "@fontsource/yanone-kaffeesatz";
+import { AuthProvider } from "@/contexts/AuthContext";
+import { CartProvider } from "@/contexts/CartContext";
 
-function MyApp({ Component, pageProps: { session, ...pageProps } }) {
+const queryClient = new QueryClient();
+
+function MyApp({ Component, pageProps }) {
   return (
-    <SessionProvider session={session}>
-      <Component {...pageProps} />
-    </SessionProvider>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <CartProvider>
+          <Component {...pageProps} />
+        </CartProvider>
+      </AuthProvider>
+    </QueryClientProvider>
   );
 }
 

@@ -2,15 +2,20 @@ import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect, useRef } from "react";
-import { HiOutlineMenu, HiOutlineX } from "react-icons/hi";
+import {
+  HiOutlineMenu,
+  HiOutlineX,
+  HiOutlineChevronDown,
+} from "react-icons/hi";
 import { FiShoppingBag, FiUser } from "react-icons/fi";
 import LoginModal from "./LoginModal";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isLoginModalOpen, setLoginModalOpen] = useState(false);
   const [isDropdownOpen, setDropdownOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // Mock state
+  const { user, logout, loading } = useAuth();
 
   const dropdownRef = useRef(null);
 
@@ -18,7 +23,7 @@ export default function Navbar() {
   const toggleDropdown = () => setDropdownOpen(!isDropdownOpen);
 
   const handleLogout = () => {
-    setIsLoggedIn(false);
+    logout();
     setDropdownOpen(false);
   };
 
@@ -77,10 +82,24 @@ export default function Navbar() {
           <div className="relative hidden md:block" ref={dropdownRef}>
             <button
               onClick={toggleDropdown}
-              className="hover:opacity-60 transition"
+              className="hover:opacity-60 transition flex items-center gap-2"
               aria-label="User Profile"
             >
-              <FiUser size={24} />
+              {!user ? (
+                <div className="flex items-center gap-2">
+                  <FiUser size={24} />
+                  <HiOutlineChevronDown size={16} />
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-full bg-gray-200 flex justify-center items-center">
+                    <span className="font-semibold text-gray-600">
+                      {user?.username?.charAt(0).toUpperCase()}
+                    </span>
+                  </div>
+                  <HiOutlineChevronDown size={16} />
+                </div>
+              )}
             </button>
             <AnimatePresence>
               {isDropdownOpen && (
@@ -90,8 +109,12 @@ export default function Navbar() {
                   exit={{ opacity: 0, y: -10 }}
                   className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-50 border border-black/5"
                 >
-                  {isLoggedIn ? (
+                  {user ? (
                     <div className="py-1">
+                      <div className="px-4 py-2 text-sm text-gray-700">
+                        Signed in as{" "}
+                        <span className="font-bold">{user.username}</span>
+                      </div>
                       <Link
                         href="/profile"
                         className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
@@ -122,9 +145,10 @@ export default function Navbar() {
                       </Link>
                       <button
                         onClick={handleLogout}
-                        className="w-full text-left block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        className="w-full text-left block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 disabled:opacity-50"
+                        disabled={loading}
                       >
-                        Logout
+                        {loading ? "Logging out..." : "Logout"}
                       </button>
                     </div>
                   ) : (
@@ -179,7 +203,7 @@ export default function Navbar() {
                 {link.name}
               </Link>
             ))}
-            {isLoggedIn ? (
+            {user ? (
               <>
                 <Link
                   href="/profile"
@@ -193,9 +217,10 @@ export default function Navbar() {
                     handleLogout();
                     setMobileOpen(false);
                   }}
-                  className="text-lg font-semibold hover:opacity-60 transition"
+                  className="text-lg font-semibold hover:opacity-60 transition disabled:opacity-50"
+                  disabled={loading}
                 >
-                  LOGOUT
+                  {loading ? "Logging out..." : "LOGOUT"}
                 </button>
               </>
             ) : (
