@@ -3,9 +3,9 @@ import axios from "axios";
 import Cookies from "js-cookie";
 import Swal from "sweetalert2";
 
-export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+// export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
-const API_BASE = API_BASE_URL || "https://novarewear-backend.onrender.com/api";
+const API_BASE = "https://novarewear-backend.onrender.com/api";
 
 const api = axios.create({
   baseURL: API_BASE,

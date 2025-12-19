@@ -142,19 +142,28 @@ export function AuthProvider({ children }) {
   }, [logoutMutation]);
 
   const loginWithGoogle = useCallback(
-    async ({ accessToken, refreshToken, user }) => {
+    async ({ accessToken, refreshToken, user: googleUser }) => {
       try {
+        // Normalize the user object to ensure consistency
+        const normalizedUser = googleUser
+          ? {
+              id: googleUser._id,
+              username: googleUser.username,
+              email: googleUser.email,
+              role: googleUser.role,
+            }
+          : null;
+
         Cookies.set("authToken", accessToken, { expires: 7 });
 
         if (refreshToken) {
           Cookies.set("refreshToken", refreshToken, { expires: 14 });
         }
-        if (user) {
-          Cookies.set("user", JSON.stringify(user), { expires: 7 });
-          queryClient.setQueryData(["user"], user);
+        if (normalizedUser) {
+          Cookies.set("user", JSON.stringify(normalizedUser), { expires: 7 });
+          queryClient.setQueryData(["user"], normalizedUser);
         }
 
-        await queryClient.invalidateQueries({ queryKey: ["user"] });
         await queryClient.invalidateQueries({ queryKey: ["cart"] });
 
         Swal.fire({
@@ -165,7 +174,7 @@ export function AuthProvider({ children }) {
           showConfirmButton: false,
         });
 
-        return { success: true, user };
+        return { success: true, user: normalizedUser };
       } catch (error) {
         console.error("Google login processing failed:", error);
         Swal.fire({
