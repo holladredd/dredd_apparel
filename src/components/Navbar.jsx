@@ -10,12 +10,14 @@ import {
 import { FiShoppingBag, FiUser } from "react-icons/fi";
 import LoginModal from "./LoginModal";
 import { useAuth } from "@/contexts/AuthContext";
+import { useCart } from "@/contexts/CartContext";
 
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isLoginModalOpen, setLoginModalOpen] = useState(false);
   const [isDropdownOpen, setDropdownOpen] = useState(false);
   const { user, logout, loading } = useAuth();
+  const { totalItems } = useCart();
 
   const dropdownRef = useRef(null);
 
@@ -140,7 +142,7 @@ export default function Navbar() {
                       >
                         Cart
                         <span className=" bg-black text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                          2
+                          {totalItems}
                         </span>
                       </Link>
                       <button
@@ -239,7 +241,7 @@ export default function Navbar() {
               className="text-lg font-semibold hover:opacity-60 transition"
               onClick={() => setMobileOpen(false)}
             >
-              CART
+              CART ({totalItems})
             </Link>
           </div>
         </motion.div>

@@ -1,13 +1,16 @@
 import { useRouter } from "next/router";
 import { useQuery } from "@tanstack/react-query";
 import { useProducts } from "@/contexts/ProductContext";
+import { useCart } from "@/contexts/CartContext";
 import Navbar from "@/components/Navbar";
 import { useState } from "react";
+import Swal from "sweetalert2";
 
 export default function ProductPage() {
   const router = useRouter();
   const { slug } = router.query;
   const { fetchProductBySlug } = useProducts();
+  const { addItem, isAddingItem } = useCart();
   const [quantity, setQuantity] = useState(1);
   const [selectedSize, setSelectedSize] = useState(null);
 
@@ -20,6 +23,18 @@ export default function ProductPage() {
     queryFn: () => fetchProductBySlug(slug),
     enabled: !!slug,
   });
+
+  const handleAddToCart = () => {
+    if (product.sizes && product.sizes.length > 0 && !selectedSize) {
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "Please select a size!",
+      });
+      return;
+    }
+    addItem({ productId: product._id, size: selectedSize });
+  };
 
   if (isLoading) return <div className="text-center py-12">Loading...</div>;
   if (isError)
@@ -51,7 +66,7 @@ export default function ProductPage() {
               {product.name}
             </h1>
             <p className="text-2xl font-semibold tracking-widest mb-4">
-              ${product?.price?.toFixed(2)}
+              ₦{product?.price?.toFixed(2)}
             </p>
             <p className="text-gray-600 mb-6">{product.description}</p>
 
@@ -82,8 +97,12 @@ export default function ProductPage() {
                 onChange={(e) => setQuantity(parseInt(e.target.value))}
                 className="w-20 border border-black px-3 py-2 text-center"
               />
-              <button className="w-full bg-black text-white py-3 px-6 font-bold tracking-widest hover:bg-gray-800 transition">
-                Add to Cart
+              <button
+                onClick={handleAddToCart}
+                disabled={isAddingItem}
+                className="w-full bg-black text-white py-3 px-6 font-bold tracking-widest hover:bg-gray-800 transition disabled:bg-gray-400"
+              >
+                {isAddingItem ? "Adding..." : "Add to Cart"}
               </button>
             </div>
           </div>
