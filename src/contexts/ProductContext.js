@@ -42,6 +42,11 @@ export const ProductProvider = ({ children }) => {
     },
   });
 
+  const fetchProductBySlug = async (slug) => {
+    const { data } = await api.get(`/products/${slug}`);
+    return data.product;
+  };
+
   const value = {
     products: productsData?.products || [],
     pagination: productsData?.pagination || {},
@@ -49,6 +54,7 @@ export const ProductProvider = ({ children }) => {
     isError,
     filters,
     setFilters,
+    fetchProductBySlug,
   };
 
   return (
