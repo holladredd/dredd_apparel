@@ -91,6 +91,31 @@ export function AuthProvider({ children }) {
     },
   });
 
+  const updateProfileMutation = useMutation({
+    mutationFn: async (userData) => {
+      const { data } = await api.patch("auth/updateprofile/", userData);
+      return data;
+    },
+    onSuccess: (data) => {
+      queryClient.setQueryData(["user"], data.user);
+      Swal.fire({
+        icon: "success",
+        title: "Profile Updated!",
+        text: "Your profile has been updated successfully.",
+        timer: 2000,
+        showConfirmButton: false,
+      });
+    },
+    onError: (error) => {
+      console.error("Profile update failed:", error.message);
+      Swal.fire({
+        icon: "error",
+        title: "Update Failed",
+        text: error.nmessage || "An error occurred during profile update.",
+      });
+    },
+  });
+
   const logoutMutation = useMutation({
     mutationFn: async () => {
       const refreshToken = Cookies.get("refreshToken");
@@ -140,6 +165,21 @@ export function AuthProvider({ children }) {
   const logout = useCallback(() => {
     logoutMutation.mutate();
   }, [logoutMutation]);
+
+  const updateProfile = useCallback(
+    async (userData) => {
+      try {
+        const data = await updateProfileMutation.mutateAsync(userData);
+        return { success: true, user: data.user };
+      } catch (error) {
+        return {
+          success: false,
+          message: error.message || "An error occurred during profile update.",
+        };
+      }
+    },
+    [updateProfileMutation]
+  );
 
   const loginWithGoogle = useCallback(
     async ({ accessToken, refreshToken, user: googleUser }) => {
@@ -195,10 +235,12 @@ export function AuthProvider({ children }) {
       isLoading ||
       loginMutation.isPending ||
       registerMutation.isPending ||
-      logoutMutation.isPending,
+      logoutMutation.isPending ||
+      updateProfileMutation.isPending,
     login,
     register,
     logout,
+    updateProfile,
     loginWithGoogle,
     query: {
       refetch: () => queryClient.invalidateQueries({ queryKey: ["user"] }),

@@ -41,6 +41,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { CartProvider } from "@/contexts/CartContext";
 
 import "../styles/globals.css";
+import { ProductProvider } from "@/contexts/ProductContext";
 
 function MyApp({ Component, pageProps }) {
   const [queryClient] = useState(() => new QueryClient());
@@ -49,7 +50,9 @@ function MyApp({ Component, pageProps }) {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <CartProvider>
-          <Component {...pageProps} />
+          <ProductProvider>
+            <Component {...pageProps} />
+          </ProductProvider>
         </CartProvider>
       </AuthProvider>
     </QueryClientProvider>
