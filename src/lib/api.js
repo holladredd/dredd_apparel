@@ -144,6 +144,11 @@ api.interceptors.response.use(
 
     // --- Handle 401 (Unauthorized) with token refresh ---
     if (status === 401) {
+      // Do not attempt to refresh token for login failures
+      if (originalRequest.url.endsWith("/auth/login/")) {
+        return Promise.reject(formatError(error));
+      }
+
       if (isRefreshing) {
         // Queue request until refresh completes
         return new Promise((resolve, reject) => {

@@ -47,11 +47,12 @@ export function AuthProvider({ children }) {
       });
     },
     onError: (error) => {
-      console.error("Login failed:", error.message);
+      const errorMessage =
+        error.details || error.message || "An error occurred during login.";
       Swal.fire({
         icon: "error",
         title: "Login Failed",
-        text: error.response?.data?.detail || "An error occurred during login.",
+        text: errorMessage,
       });
     },
   });
@@ -145,7 +146,10 @@ export function AuthProvider({ children }) {
       } catch (error) {
         return {
           success: false,
-          message: error.message || "An error occurred during login.",
+          message:
+            error.message ||
+            error.response?.data?.message ||
+            "An error occurred during login.",
         };
       }
     },
