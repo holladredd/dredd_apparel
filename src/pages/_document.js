@@ -9,17 +9,15 @@ export default function Document() {
         <meta name="description" content="Nothing Ordinary." />
         <meta property="og:type" content="website" />
         <meta property="og:site_name" content="NØVÁRE" />
-        <meta
-          property="og:image"
-          content="https://www.novarewear.com/novare.jpg"
-        />
+        <meta property="og:image" content="https://novarewear.com/novare.jpg" />
         <meta
           name="twitter:image"
-          content="https://www.novarewear.com/novare.jpg"
+          content="https://novarewear.com/novare.jpg"
         />
+        <meta name="twitter:site" content="@novarewear" />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
-        <link rel="canonical" href="https://www.novarewear.com" />
+        <link rel="canonical" href="https://novarewear.com" />
         <meta name="author" content="NØVÁRE Group" />
         <meta
           name="keywords"

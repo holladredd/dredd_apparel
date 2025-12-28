@@ -82,7 +82,7 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+      <div className="flex items-center justify-center min-h-screen bg-gray-50 transparent">
         <div className="w-16 h-16 border-4 border-dashed rounded-full animate-spin border-black"></div>
       </div>
     );
