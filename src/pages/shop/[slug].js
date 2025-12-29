@@ -409,7 +409,7 @@ export default function ProductPage() {
         <div className="grid md:grid-cols-2 gap-8">
           <div>
             <img
-              src={product.images?.[0] || "/placeholder.png"}
+              src={product.images?.[0]?.url || "/placeholder.png"}
               alt={product.name}
               className="w-full h-auto object-cover rounded-lg"
             />
@@ -472,7 +472,7 @@ export default function ProductPage() {
               {product.lookImages.map((image, index) => (
                 <div key={index} className="overflow-hidden rounded-lg">
                   <img
-                    src={image}
+                    src={image.url}
                     alt={`Look ${index + 1}`}
                     className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
                   />
