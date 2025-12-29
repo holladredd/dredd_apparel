@@ -37,7 +37,7 @@ export default function LookbookPage() {
         {looks?.map((product) => (
           <LookbookItem
             key={product._id}
-            image={product.lookImages[0]}
+            image={product.lookImages[0]?.url}
             title={product.name}
             subtitle={product.category}
             shopLink={`/shop/${product.slug}`}

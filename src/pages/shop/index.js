@@ -32,7 +32,7 @@ const ProductCard = ({ product, wishlist, addItem, removeItem }) => {
         <div className="cursor-pointer">
           <div className="relative h-64">
             <img
-              src={product.images[0]}
+              src={product.images[0]?.url}
               alt={product.name}
               className="w-full h-full object-cover"
             />
