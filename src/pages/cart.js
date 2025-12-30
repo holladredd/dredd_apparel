@@ -84,7 +84,7 @@ export default function CartPage() {
                   className="flex items-center gap-6 border-b border-gray-200 pb-6"
                 >
                   <Image
-                    src={item.product.images[0]}
+                    src={item.product.images[0]?.url}
                     alt={item.product.name}
                     width={96}
                     height={96}
